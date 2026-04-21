@@ -1,0 +1,9 @@
+node_modules/
+
+# Vite build output (we use /docs for Pages)
+dist/
+
+# OS / tooling
+.DS_Store
+Thumbs.db
+
