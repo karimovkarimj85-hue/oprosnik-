@@ -1,8 +1,6 @@
-import { useMemo, useState } from 'react';
-import { FiBarChart2, FiCloud, FiEdit, FiFileText, FiHeart, FiMapPin } from 'react-icons/fi';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import FloatingLines from './components/FloatingLines/FloatingLines.jsx';
-import GlassIcons from './components/GlassIcons/GlassIcons.jsx';
 import './survey.css';
 
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xzdyajgz';
@@ -23,14 +21,44 @@ const QUESTIONS = [
     type: 'single',
     number: '02',
     text: 'Какая IT-идея, на ваш взгляд, нужнее всего в регионах Узбекистана?',
-    sub: 'Выберите одну — ту, которой реально не хватает у вас дома.',
+    sub: 'Сначала пролистайте все идеи, затем выберите одну.',
     options: [
-      { emoji: '🔧', label: 'Маркетплейс мастеров и ремонта', sub: 'Найти сантехника, электрика, отделочника' },
-      { emoji: '👷', label: 'HR-платформа для рабочих', sub: 'Заводы, стройки, рестораны ищут сотрудников' },
-      { emoji: '📊', label: 'SaaS-учёт для малого бизнеса', sub: 'Бухгалтерия и касса для ИП и магазинов' },
-      { emoji: '🌾', label: 'Агромаркетплейс для фермеров', sub: 'Продажа урожая напрямую без посредников' },
-      { emoji: '📦', label: 'Логистика и доставка', sub: 'Для интернет-магазинов и e-commerce' },
-      { emoji: '🎓', label: 'EdTech — подготовка к DTM/ЕГЭ', sub: 'Онлайн-репетиторы и курсы' },
+      {
+        emoji: '🔧',
+        label: 'Маркетплейс мастеров и ремонта',
+        sub: 'Найти сантехника, электрика, отделочника',
+        details: ['Каталог мастеров по району', 'Отзывы и фото работ', 'Заявка и быстрый отклик', 'Прозрачные цены'],
+      },
+      {
+        emoji: '👷',
+        label: 'HR-платформа для рабочих',
+        sub: 'Заводы, стройки, рестораны ищут сотрудников',
+        details: ['Вакансии рядом с домом', 'Быстрый отклик без резюме', 'Смены/подработки', 'Рейтинг работодателей'],
+      },
+      {
+        emoji: '📊',
+        label: 'SaaS-учёт для малого бизнеса',
+        sub: 'Бухгалтерия и касса для ИП и магазинов',
+        details: ['Продажи и остатки', 'Долги/поставщики', 'Отчёты одним кликом', 'Работа с телефона'],
+      },
+      {
+        emoji: '🌾',
+        label: 'Агромаркетплейс для фермеров',
+        sub: 'Продажа урожая напрямую без посредников',
+        details: ['Покупатели из городов', 'Цены по регионам', 'Опт и розница', 'Доставка/логистика партнёров'],
+      },
+      {
+        emoji: '📦',
+        label: 'Логистика и доставка',
+        sub: 'Для интернет-магазинов и e-commerce',
+        details: ['Курьеры по городу', 'Трекинг заказов', 'Оплата при получении', 'Интеграция с магазинами'],
+      },
+      {
+        emoji: '🎓',
+        label: 'EdTech — подготовка к DTM/ЕГЭ',
+        sub: 'Онлайн-репетиторы и курсы',
+        details: ['Тесты и разборы', 'Личный план подготовки', 'Учителя по предметам', 'Занятия вечером/в выходные'],
+      },
     ],
   },
   {
@@ -97,32 +125,12 @@ export default function App() {
 
   const pct = Math.round(((Math.min(current, QUESTIONS.length - 1) + 1) / QUESTIONS.length) * 100);
 
-  const glassItems = useMemo(
-    () => [
-      { icon: <FiMapPin />, color: 'indigo', label: 'Регион' },
-      { icon: <FiFileText />, color: 'blue', label: 'Идея' },
-      { icon: <FiHeart />, color: 'red', label: 'Польза' },
-      { icon: <FiCloud />, color: 'purple', label: 'Онлайн' },
-      { icon: <FiEdit />, color: 'orange', label: 'Просто' },
-      { icon: <FiBarChart2 />, color: 'green', label: 'Вывод' },
-    ],
-    []
-  );
-
   const q = QUESTIONS[current];
 
   const stepState = (i) => (i < current ? 'done' : i === current ? 'active' : 'todo');
 
   const selectOption = (idx) => {
     setAnswers((a) => ({ ...a, [q.id]: idx }));
-    // mobile friendly: go next shortly
-    window.setTimeout(() => {
-      if (current === QUESTIONS.length - 1) {
-        finish();
-      } else {
-        setCurrent((c) => c + 1);
-      }
-    }, 220);
   };
 
   const nextFromText = () => {
@@ -185,6 +193,12 @@ export default function App() {
   const canNext =
     q?.type === 'text' ? true : answers[q.id] !== null && answers[q.id] !== undefined;
 
+  const goNext = () => {
+    if (!canNext) return;
+    if (current === QUESTIONS.length - 1) finish();
+    else setCurrent((c) => c + 1);
+  };
+
   return (
     <>
       <div className="bg-webgl">
@@ -212,10 +226,6 @@ export default function App() {
             <span>Анонимно</span>
             <span>~3 минуты</span>
             <span>С телефона удобно</span>
-          </div>
-
-          <div className="hero-icons" aria-hidden="true">
-            <GlassIcons items={glassItems} colorful={false} />
           </div>
         </header>
 
@@ -276,35 +286,43 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <div className="options" role="radiogroup" aria-label={q.text}>
-                    {q.options.map((o, idx) => {
-                      const selected = answers[q.id] === idx;
-                      return (
-                        <button
-                          key={idx}
-                          type="button"
-                          className={`option ${selected ? 'selected' : ''}`}
-                          aria-pressed={selected ? 'true' : 'false'}
-                          onPointerMove={(e) => {
-                            const el = e.currentTarget;
-                            const r = el.getBoundingClientRect();
-                            el.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
-                            el.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
-                          }}
-                          onClick={() => selectOption(idx)}
-                        >
-                          <span className="opt-radio" aria-hidden="true" />
-                          <span className="opt-emoji" aria-hidden="true">
-                            {o.emoji}
-                          </span>
-                          <span>
-                            <span className="opt-label">{o.label}</span>
-                            {o.sub ? <span className="opt-sub">{o.sub}</span> : null}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {q.id === 'idea' ? (
+                    <IdeaCarousel
+                      question={q}
+                      selectedIndex={answers.idea}
+                      onSelect={selectOption}
+                    />
+                  ) : (
+                    <div className="options" role="radiogroup" aria-label={q.text}>
+                      {q.options.map((o, idx) => {
+                        const selected = answers[q.id] === idx;
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            className={`option ${selected ? 'selected' : ''}`}
+                            aria-pressed={selected ? 'true' : 'false'}
+                            onPointerMove={(e) => {
+                              const el = e.currentTarget;
+                              const r = el.getBoundingClientRect();
+                              el.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
+                              el.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+                            }}
+                            onClick={() => selectOption(idx)}
+                          >
+                            <span className="opt-radio" aria-hidden="true" />
+                            <span className="opt-emoji" aria-hidden="true">
+                              {o.emoji}
+                            </span>
+                            <span>
+                              <span className="opt-label">{o.label}</span>
+                              {o.sub ? <span className="opt-sub">{o.sub}</span> : null}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   <div className="nav">
                     {current > 0 ? (
@@ -319,10 +337,7 @@ export default function App() {
                       type="button"
                       className="btn btn-primary"
                       disabled={!canNext}
-                      onClick={() => {
-                        if (current === QUESTIONS.length - 1) finish();
-                        else setCurrent((c) => c + 1);
-                      }}
+                      onClick={goNext}
                     >
                       {current === QUESTIONS.length - 1 ? 'Завершить ✓' : 'Далее →'}
                     </button>
@@ -425,6 +440,95 @@ export default function App() {
         </main>
       </div>
     </>
+  );
+}
+
+function IdeaCarousel({ question, selectedIndex, onSelect }) {
+  const scrollerRef = useRef(null);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      const w = el.clientWidth || 1;
+      const p = Math.round(el.scrollLeft / w);
+      setPage(Math.max(0, Math.min(question.options.length - 1, p)));
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [question.options.length]);
+
+  const scrollTo = (idx) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTo({ left: idx * el.clientWidth, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="idea-wrap" role="radiogroup" aria-label={question.text}>
+      <div className="idea-top">
+        <div className="idea-hint">Листайте идеи → затем выберите одну</div>
+        <div className="idea-nav">
+          <button type="button" className="idea-arrow" onClick={() => scrollTo(Math.max(0, page - 1))} aria-label="Предыдущая идея">
+            ←
+          </button>
+          <button type="button" className="idea-arrow" onClick={() => scrollTo(Math.min(question.options.length - 1, page + 1))} aria-label="Следующая идея">
+            →
+          </button>
+        </div>
+      </div>
+
+      <div className="idea-scroller" ref={scrollerRef}>
+        {question.options.map((o, idx) => {
+          const selected = selectedIndex === idx;
+          return (
+            <div className="idea-slide" key={idx}>
+              <div className={`idea-card ${selected ? 'selected' : ''}`}>
+                <div className="idea-head">
+                  <div className="idea-emoji" aria-hidden="true">{o.emoji}</div>
+                  <div>
+                    <div className="idea-title">{o.label}</div>
+                    {o.sub ? <div className="idea-sub">{o.sub}</div> : null}
+                  </div>
+                </div>
+
+                {Array.isArray(o.details) && o.details.length > 0 ? (
+                  <ul className="idea-details">
+                    {o.details.map((d, i) => (
+                      <li key={i}>{d}</li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                <button
+                  type="button"
+                  className={`idea-pick ${selected ? 'picked' : ''}`}
+                  aria-pressed={selected ? 'true' : 'false'}
+                  onClick={() => onSelect(idx)}
+                >
+                  {selected ? 'Выбрано ✓' : 'Выбрать эту идею'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="idea-dots" aria-hidden="true">
+        {question.options.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            className={`idea-dot ${i === page ? 'active' : ''}`}
+            onClick={() => scrollTo(i)}
+            aria-label={`Идея ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
