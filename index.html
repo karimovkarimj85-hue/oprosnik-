@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Анонимный опрос: какие IT-идеи нужны в регионах Узбекистана">
+<title>Опрос — IT идеи для Узбекистана</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #07070c;
+    --surface: rgba(18, 18, 26, 0.72);
+    --surface-solid: #12121a;
+    --surface2: rgba(26, 26, 38, 0.85);
+    --border: rgba(255, 255, 255, 0.07);
+    --border-glow: rgba(139, 92, 246, 0.45);
+    --text: #f4f4f8;
+    --muted: #9898b8;
+    --accent: #8b5cf6;
+    --accent2: #a78bfa;
+    --accent-dim: rgba(139, 92, 246, 0.14);
+    --green: #34d399;
+    --amber: #fbbf24;
+    --danger: #f87171;
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --shadow-card: 0 24px 80px rgba(0, 0, 0, 0.45);
+    --font: 'DM Sans', system-ui, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.5;
+  }
+
+  /* Mesh + vignette (React Bits–style layered bg) */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 100% 80% at 50% -20%, rgba(139, 92, 246, 0.18), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 100% 0%, rgba(167, 139, 250, 0.12), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 0% 100%, rgba(99, 102, 241, 0.1), transparent 45%);
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.35;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: clamp(24px, 5vw, 48px) clamp(16px, 4vw, 24px) 88px;
+  }
+
+  /* Hero — glass strip */
+  .hero {
+    text-align: center;
+    margin-bottom: 28px;
+    padding: 24px 20px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(99, 102, 241, 0.04));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    background: var(--accent-dim);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    margin-bottom: 16px;
+  }
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  .hero h1 {
+    font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, #fff 0%, rgba(220, 220, 240, 0.85) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Stepper */
+  .stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 0 4px;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    max-width: 72px;
+    position: relative;
+  }
+  .step::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: calc(50% + 18px);
+    width: calc(100% - 18px);
+    height: 2px;
+    background: var(--surface2);
+    z-index: 0;
+  }
+  .step:last-child::after { display: none; }
+  .step.done::after,
+  .step.active::after {
+    background: linear-gradient(90deg, var(--accent), rgba(139, 92, 246, 0.3));
+  }
+  .step-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 1;
+    background: var(--surface-solid);
+    border: 2px solid var(--border);
+    color: var(--muted);
+    transition: border-color 0.25s, background 0.25s, color 0.25s, box-shadow 0.25s;
+  }
+  .step.active .step-circle {
+    border-color: var(--accent);
+    color: #fff;
+    background: linear-gradient(145deg, var(--accent), #6d28d9);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.45);
+  }
+  .step.done .step-circle {
+    border-color: rgba(52, 211, 153, 0.5);
+    color: var(--green);
+    background: rgba(52, 211, 153, 0.12);
+  }
+  .step-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.2;
+  }
+  .step.active .step-label { color: var(--accent2); }
+
+  /* Progress bar */
+  .progress-wrap { margin-bottom: 22px; }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar-bg {
+    height: 5px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #7c3aed, var(--accent2), #c4b5fd);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease infinite;
+    transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Question card — glass + border glow */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: clamp(22px, 4vw, 30px);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-card);
+    animation: cardIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.35) 0%,
+      transparent 40%,
+      transparent 60%,
+      rgba(167, 139, 250, 0.2) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .q-number {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .q-text {
+    font-size: clamp(1rem, 2.8vw, 1.15rem);
+    font-weight: 600;
+    line-height: 1.45;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .q-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 22px;
+    line-height: 1.55;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .option::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle 120px at var(--mx, 50%) var(--my, 50%), rgba(139, 92, 246, 0.18), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .option:hover {
+    border-color: rgba(139, 92, 246, 0.35);
+    transform: translateX(3px);
+  }
+  .option:hover::after { opacity: 1; }
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.12);
+  }
+  .option.selected .opt-radio {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .option.selected .opt-radio::after { opacity: 1; }
+
+  .opt-radio {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .opt-radio::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .opt-emoji { font-size: 1.35rem; flex-shrink: 0; line-height: 1; }
+  .option .opt-label { display: block; font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.35; }
+  .option .opt-sub { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+  .region-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    font-size: 15px;
+    font-family: var(--font);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 6px;
+  }
+  .region-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  }
+  .region-input::placeholder { color: var(--muted); }
+
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    gap: 12px;
+  }
+  .btn {
+    padding: 12px 22px;
+    border-radius: var(--radius-md);
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    font-family: var(--font);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #7c3aed, var(--accent));
+    color: #fff;
+    box-shadow: 0 8px 28px rgba(124, 58, 237, 0.4);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 36px rgba(124, 58, 237, 0.5);
+  }
+  .btn-primary:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.15); }
+
+  /* Results */
+  .results-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: clamp(22px, 4vw, 30px);
+    animation: cardIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .submission-banner {
+    font-size: 13px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    line-height: 1.45;
+  }
+  .submission-banner.ok {
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    color: #6ee7b7;
+  }
+  .submission-banner.warn {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    color: var(--amber);
+  }
+  .submission-banner.err {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    color: #fca5a5;
+  }
+
+  .results-header { text-align: center; margin-bottom: 28px; }
+  .results-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, var(--accent), #6d28d9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 14px;
+    box-shadow: 0 12px 40px rgba(124, 58, 237, 0.45);
+  }
+  .results-header h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; }
+  .results-header p { font-size: 14px; color: var(--muted); }
+
+  .result-row { margin-bottom: 18px; }
+  .result-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .result-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .result-bar-bg {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .result-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #7c3aed, var(--accent2));
+    width: 0;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1) 0.25s;
+  }
+
+  .copy-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 22px;
+  }
+  .copy-label { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .copy-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .copy-btn {
+    width: 100%;
+    margin-top: 14px;
+    padding: 12px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    border-radius: 10px;
+    color: var(--accent2);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: var(--font);
+  }
+  .copy-btn:hover { background: rgba(139, 92, 246, 0.22); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 18px 0;
+  }
+
+  .footer-note {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.55;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero" role="banner">
+    <div class="badge"><span class="badge-dot" aria-hidden="true"></span> IT-опрос · Узбекистан</div>
+    <h1>Какие IT-идеи реально нужны в вашем регионе?</h1>
+    <div class="hero-meta">
+      <span>Анонимно</span>
+      <span>~3 минуты</span>
+      <span>Без регистрации</span>
+    </div>
+  </header>
+
+  <div class="stepper" id="stepper" aria-hidden="true"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span id="prog-label">Вопрос 1 из 4</span>
+      <span id="prog-pct">25%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="prog-bar" style="width:25%"></div>
+    </div>
+  </div>
+
+  <main id="quiz-area" role="main"></main>
+
+  <p class="footer-note">
+    Ответы можно отправить на сервер опроса (Formspree) — настройте ID формы в начале скрипта.
+    Без настройки вы всё равно увидите итог и сможете скопировать текст.
+  </p>
+</div>
+
+<script>
+/**
+ * Сбор ответов на GitHub Pages (без своего сервера):
+ * 1. Зарегистрируйтесь на https://formspree.io
+ * 2. Создайте форму → скопируйте URL вида https://formspree.io/f/xxxxxxxx
+ * 3. Вставьте ниже вместо пустой строки
+ * Письма/экспорт ответов — в кабинете Formspree.
+ */
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xzdyajgz';
+
+const STEP_LABELS = ['Регион', 'Идея', 'Цифра', 'Цена'];
+
+const answers = {};
+
+const questions = [
+  {
+    id: 'region',
+    type: 'text',
+    number: '01',
+    text: 'Из какого вы города или района?',
+    sub: 'Название поможет понять географию спроса — можно кратко.',
+    placeholder: 'Например: Самарканд, Наманган, Андижан…'
+  },
+  {
+    id: 'idea',
+    type: 'single',
+    number: '02',
+    text: 'Какая IT-идея, на ваш взгляд, нужнее всего в регионах Узбекистана?',
+    sub: 'Выберите одну — ту, которой реально не хватает у вас дома.',
+    options: [
+      { emoji: '🔧', label: 'Маркетплейс мастеров и ремонта', sub: 'Найти сантехника, электрика, отделочника' },
+      { emoji: '👷', label: 'HR-платформа для рабочих', sub: 'Заводы, стройки, рестораны ищут сотрудников' },
+      { emoji: '📊', label: 'SaaS-учёт для малого бизнеса', sub: 'Бухгалтерия и касса для ИП и магазинов' },
+      { emoji: '🌾', label: 'Агромаркетплейс для фермеров', sub: 'Продажа урожая напрямую без посредников' },
+      { emoji: '📦', label: 'Логистика и доставка', sub: 'Для интернет-магазинов и e-commerce' },
+      { emoji: '🎓', label: 'EdTech — подготовка к DTM/ЕГЭ', sub: 'Онлайн-репетиторы и курсы' },
+    ]
+  },
+  {
+    id: 'digital',
+    type: 'single',
+    number: '03',
+    text: 'Люди 25+ лет у вас дома — насколько уверенно пользуются смартфоном и интернетом?',
+    sub: 'Ориентируйтесь на родителей, соседей, знакомых из вашего города или района.',
+    options: [
+      { emoji: '💪', label: 'Уверенно — сами всё делают', sub: 'Оплачивают, заказывают такси, переписываются' },
+      { emoji: '🙂', label: 'В основном справляются', sub: 'Иногда просят детей помочь с чем-то новым' },
+      { emoji: '😕', label: 'Только базовое', sub: 'WhatsApp и звонки — больше ничего' },
+      { emoji: '📵', label: 'Почти не пользуются', sub: 'Кнопочный телефон или вообще без смартфона' },
+    ]
+  },
+  {
+    id: 'price',
+    type: 'single',
+    number: '04',
+    text: 'Какую сумму в месяц люди у вас готовы платить за удобный сервис?',
+    sub: 'Например, за приложение, где легко найти мастера или работника.',
+    options: [
+      { emoji: '🆓', label: 'Только бесплатно', sub: 'Платить за приложение не будут вообще' },
+      { emoji: '💵', label: '10 000 – 20 000 сум (~$0.8–1.5)', sub: 'Небольшая сумма, почти символическая' },
+      { emoji: '💰', label: '30 000 – 50 000 сум (~$2.5–4)', sub: 'Если сервис реально полезный' },
+      { emoji: '💎', label: '100 000+ сум (~$8+)', sub: 'За качественный продукт заплатят хорошо' },
+    ]
+  }
+];
+
+let current = 0;
+
+function renderStepper() {
+  const el = document.getElementById('stepper');
+  el.innerHTML = questions.map((_, i) => {
+    let cls = 'step';
+    if (i < current) cls += ' done';
+    else if (i === current) cls += ' active';
+    return `
+      <div class="${cls}">
+        <div class="step-circle">${i < current ? '✓' : i + 1}</div>
+        <span class="step-label">${STEP_LABELS[i]}</span>
+      </div>`;
+  }).join('');
+}
+
+function updateProgress() {
+  const pct = Math.round(((current + 1) / questions.length) * 100);
+  document.getElementById('prog-label').textContent = `Вопрос ${current + 1} из ${questions.length}`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-bar').style.width = pct + '%';
+  renderStepper();
+}
+
+function render() {
+  updateProgress();
+  const q = questions[current];
+  const area = document.getElementById('quiz-area');
+
+  if (q.type === 'text') {
+    area.innerHTML = `
+      <div class="question-card">
+        <div class="q-number">Вопрос ${q.number}</div>
+        <h2 class="q-text">${escapeHtml(q.text)}</h2>
+        <p class="q-sub">${escapeHtml(q.sub)}</p>
+        <label class="sr-only" for="text-input">${escapeHtml(q.text)}</label>
+        <input class="region-input" type="text" id="text-input" autocomplete="address-level2"
+          placeholder="${escapeAttr(q.placeholder)}"
+          value="${escapeAttr(answers[q.id] || '')}">
+        <div class="nav">
+          <div></div>
+          <button type="button" class="btn btn-primary" id="text-next">Далее →</button>
+        </div>
+      </div>`;
+    const inp = document.getElementById('text-input');
+    inp.focus();
+    document.getElementById('text-next').addEventListener('click', nextFromText);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') nextFromText(); });
+
+  } else if (q.type === 'single') {
+    const opts = q.options.map((o, i) => `
+      <button type="button" class="option ${answers[q.id] === i ? 'selected' : ''}"
+           data-index="${i}"
+           aria-pressed="${answers[q.id] === i ? 'true' : 'false'}">
+        <span class="opt-radio" aria-hidden="true"></span>
+        <span class="opt-emoji" aria-hidden="true">${o.emoji}</span>
+        <span>
+          <span class="opt-label">${escapeHtml(o.label)}</span>
+          ${o.sub ? `<span class="opt-sub">${escapeHtml(o.sub)}</span>` : ''}
+        </span>
+      </button>`).join('');
+
+    area.innerHTML = `
+      <div class="question-card">
+        <div class="q-number">Вопрос ${q.number}</div>
+        <h2 class="q-text">${escapeHtml(q.text)}</h2>
+        <p class="q-sub">${escapeHtml(q.sub)}</p>
+        <div class="options" role="radiogroup" aria-label="${escapeAttr(q.text)}">${opts}</div>
+        <div class="nav">
+          ${current > 0 ? `<button type="button" class="btn btn-ghost" id="prev-btn">← Назад</button>` : '<div></div>'}
+          <button type="button" class="btn btn-primary" id="next-btn"
+            ${answers[q.id] === undefined ? 'disabled' : ''}>
+            ${current === questions.length - 1 ? 'Завершить ✓' : 'Далее →'}
+          </button>
+        </div>
+      </div>`;
+
+    area.querySelectorAll('.option').forEach(el => {
+      el.addEventListener('mousemove', e => spotLight(el, e));
+      el.addEventListener('click', () => selectOption(Number(el.dataset.index)));
+    });
+    const nb = document.getElementById('next-btn');
+    if (nb) nb.addEventListener('click', next);
+    const pb = document.getElementById('prev-btn');
+    if (pb) pb.addEventListener('click', prev);
+  }
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function escapeAttr(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function spotLight(el, e) {
+  const r = el.getBoundingClientRect();
+  el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+  el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+}
+
+function selectOption(i) {
+  answers[questions[current].id] = i;
+  document.querySelectorAll('.option').forEach((el, idx) => {
+    const on = idx === i;
+    el.classList.toggle('selected', on);
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  const nb = document.getElementById('next-btn');
+  if (nb) nb.disabled = false;
+  setTimeout(() => next(), 280);
+}
+
+function nextFromText() {
+  const inp = document.getElementById('text-input');
+  const v = inp ? inp.value.trim() : '';
+  answers[questions[current].id] = v || 'Не указано';
+  current++;
+  render();
+}
+
+function next() {
+  if (answers[questions[current].id] === undefined) return;
+  if (current === questions.length - 1) {
+    showResults();
+    return;
+  }
+  current++;
+  render();
+}
+
+function prev() {
+  if (current > 0) {
+    current--;
+    render();
+  }
+}
+
+async function sendToFormspree(payload) {
+  const url = (typeof FORMSPREE_ENDPOINT === 'string' && FORMSPREE_ENDPOINT.trim()) || '';
+  if (!url || url.includes('formspree.io/f/xxxx') || url === 'https://formspree.io/f/') {
+    return { ok: false, skipped: true };
+  }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    body: JSON.stringify({
+      _subject: 'Опрос IT Узбекистан — новый ответ',
+      ...payload
+    })
+  });
+  return { ok: res.ok, skipped: false, status: res.status };
+}
+
+async function showResults() {
+  document.getElementById('prog-label').textContent = 'Готово';
+  document.getElementById('prog-pct').textContent = '100%';
+  document.getElementById('prog-bar').style.width = '100%';
+  document.getElementById('stepper').innerHTML = questions.map((_, i) => `
+      <div class="step done">
+        <div class="step-circle">✓</div>
+        <span class="step-label">${STEP_LABELS[i]}</span>
+      </div>`).join('');
+
+  const q = questions;
+  const ideaIdx = answers.idea;
+  const digitalIdx = answers.digital;
+  const priceIdx = answers.price;
+
+  const ideaLabel = q[1].options[ideaIdx]?.label || '—';
+  const digitalLabel = q[2].options[digitalIdx]?.label || '—';
+  const priceLabel = q[3].options[priceIdx]?.label || '—';
+
+  const digitalPct = [90, 65, 35, 10][digitalIdx] ?? 50;
+  const pricePct = [5, 40, 75, 100][priceIdx] ?? 50;
+
+  const copyText =
+`📍 Регион: ${answers.region}
+💡 Лучшая идея: ${ideaLabel}
+📱 Уровень цифровой грамотности 25+: ${digitalLabel}
+💳 Готовность платить: ${priceLabel}`;
+
+  const payload = {
+    region: answers.region,
+    idea: ideaLabel,
+    idea_index: ideaIdx,
+    digital: digitalLabel,
+    digital_index: digitalIdx,
+    price: priceLabel,
+    price_index: priceIdx,
+    submitted_at: new Date().toISOString()
+  };
+
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="results-card">
+      <div id="submission-slot"></div>
+      <div class="results-header">
+        <div class="results-icon" aria-hidden="true">✅</div>
+        <h2>Спасибо за ответы</h2>
+        <p>Ниже — краткий итог. Полные данные можно получить в кабинете Formspree после настройки.</p>
+      </div>
+
+      <div class="result-row">
+        <div class="result-label">📍 Ваш регион</div>
+        <div class="result-value">${escapeHtml(String(answers.region))}</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="result-row">
+        <div class="result-label">💡 Самая нужная идея</div>
+        <div class="result-value">${escapeHtml([q[1].options[ideaIdx]?.emoji, ideaLabel].filter(Boolean).join(' '))}</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="result-row">
+        <div class="result-label">📱 Цифровая грамотность 25+ в регионе</div>
+        <div class="result-value">${escapeHtml([q[2].options[digitalIdx]?.emoji, digitalLabel].filter(Boolean).join(' '))}</div>
+        <div class="result-bar-bg">
+          <div class="result-bar-fill" id="bar1"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="result-row">
+        <div class="result-label">💳 Готовность платить</div>
+        <div class="result-value">${escapeHtml([q[3].options[priceIdx]?.emoji, priceLabel].filter(Boolean).join(' '))}</div>
+        <div class="result-bar-bg">
+          <div class="result-bar-fill" id="bar2"></div>
+        </div>
+      </div>
+
+      <div class="copy-block">
+        <div class="copy-label">Скопируйте и отправьте в чат при необходимости</div>
+        <div class="copy-text" id="copy-content">${escapeHtml(copyText)}</div>
+        <button type="button" class="copy-btn" id="copy-btn">📋 Скопировать ответы</button>
+      </div>
+
+      <button type="button" class="btn btn-ghost" style="width:100%;margin-top:12px" id="restart-btn">
+        Пройти заново
+      </button>
+    </div>`;
+
+  document.getElementById('copy-btn').addEventListener('click', copyResult);
+  document.getElementById('restart-btn').addEventListener('click', restart);
+
+  const slot = document.getElementById('submission-slot');
+  slot.innerHTML = '<div class="submission-banner warn">Отправка ответов…</div>';
+
+  let bannerHtml = '';
+  try {
+    const result = await sendToFormspree(payload);
+    if (result.skipped) {
+      bannerHtml = '<div class="submission-banner warn"><strong>Форма не настроена.</strong> Укажите <code>FORMSPREE_ENDPOINT</code> в <code>index.html</code>, чтобы ответы сохранялись на сервере Formspree. Пока доступен только просмотр и копирование ниже.</div>';
+    } else if (result.ok) {
+      bannerHtml = '<div class="submission-banner ok">Ответы отправлены. Спасибо — они учтены в вашем проекте опроса.</div>';
+    } else {
+      bannerHtml = '<div class="submission-banner err">Не удалось отправить ответы (код ' + (result.status || '?') + '). Проверьте endpoint Formspree или попробуйте позже. Итог ниже можно скопировать вручную.</div>';
+    }
+  } catch (e) {
+    bannerHtml = '<div class="submission-banner err">Ошибка сети при отправке. Итог ниже можно скопировать вручную.</div>';
+  }
+  slot.innerHTML = bannerHtml;
+
+  setTimeout(() => {
+    const b1 = document.getElementById('bar1');
+    const b2 = document.getElementById('bar2');
+    if (b1) b1.style.width = digitalPct + '%';
+    if (b2) b2.style.width = pricePct + '%';
+  }, 80);
+}
+
+function copyResult() {
+  const text = document.getElementById('copy-content').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✅ Скопировано';
+    setTimeout(() => { btn.textContent = '📋 Скопировать ответы'; }, 2000);
+  }).catch(() => {
+    const range = document.createRange();
+    range.selectNode(document.getElementById('copy-content'));
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✅ Скопировано';
+    setTimeout(() => { btn.textContent = '📋 Скопировать ответы'; }, 2000);
+  });
+}
+
+function restart() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  current = 0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
